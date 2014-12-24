@@ -1,10 +1,15 @@
+# Tomato LED Timer
+
+This is a little project, which takes an Arduino and some parts and turns it into a timer.
+See device usage below for details.
+
 ## Requirements
+
+* See circuit for needed parts (Arduino (e.g. NanoV3), 2 buttons, Adafruit 8x8 BiColor Matrix with LED backpack).
 * Install Adafruit_GFX, Adafruit_LEDBackpack libraries: https://learn.adafruit.com/adafruit-led-backpack/1-2-8x8-matrix
 * Install inotool (`brew install ino`) to compile and upload outside of Arduino.
 
-## Device
-
-Usage:
+## Device usage
 
 	Press B1 short for advancing the minutes to be counted down.
 	Press B1 long for resetting the minutes to 1.
