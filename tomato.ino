@@ -124,6 +124,7 @@ void drawExpand(uint8_t minutes, uint8_t ones_color, uint8_t first_ring_color, u
   matrix.clear();
   if (minutes >= ((8-ONES_WIDTH)*10 + 10)) {
     matrix.fillRect(0,0,8,8, ring_color);
+    matrix.writeDisplay();
     return;
   }
   uint8_t ones = minutes % 10;

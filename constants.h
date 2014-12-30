@@ -63,4 +63,4 @@ enum mode_t {
 };
 
 #define PI 3.14159265
-#define MILLIS_TO_MINUTE_RATIO 600
+#define MILLIS_TO_MINUTE_RATIO 60000
