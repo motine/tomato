@@ -50,6 +50,9 @@ void buttonDown(uint8_t no) {
       setMode(MODE_OFF);
       break;
     case MODE_ALARM:
+      setMode(MODE_OVERTIME);
+      break;
+    case MODE_OVERTIME:
       setMode(MODE_OFF);
       break;
     case MODE_OFF:
@@ -69,6 +72,8 @@ void buttonDownLong(uint8_t no) {
       break;
     case MODE_ALARM:
       break;
+    case MODE_OVERTIME:
+      break;
     case MODE_OFF:
       break;
   }
@@ -83,6 +88,8 @@ void setMode(mode_t to_mode) {
       running_since_millis = millis();
       break;
     case MODE_ALARM:
+      break;
+    case MODE_OVERTIME:
       break;
     case MODE_OFF:
       // clear display when chaning into OFF, so we do not need to do anything in the MODE_OFF state
@@ -103,6 +110,9 @@ void doMode() {
     case MODE_ALARM:
       doAlarm();
       break;
+    case MODE_OVERTIME:
+      doOvertime();
+      break;
     case MODE_OFF:
       doOff();
       break;
@@ -112,6 +122,10 @@ void doMode() {
 void drawExpand(uint8_t minutes, uint8_t ones_color, uint8_t first_ring_color, uint8_t ring_color, uint8_t brightness) {
   matrix.setBrightness(brightness);
   matrix.clear();
+  if (minutes >= ((8-ONES_WIDTH)*10 + 10)) {
+    matrix.fillRect(0,0,8,8, ring_color);
+    return;
+  }
   uint8_t ones = minutes % 10;
   uint8_t tens = minutes / 10;
 
@@ -139,7 +153,7 @@ void doSetting() {
 }
 
 void doRunning() {
-  uint8_t minutes_past = (millis() - running_since_millis) / 600; // we ignore the overflow (approx. every 50 days)
+  uint8_t minutes_past = (millis() - running_since_millis) / MILLIS_TO_MINUTE_RATIO; // we ignore the overflow (approx. every 50 days)
   if (minutes_past >= minutes_set) {
     setMode(MODE_ALARM);
   }
@@ -157,6 +171,11 @@ void doAlarm() {
   uint8_t box_size = min(8, 9 * pulse);
   matrix.fillRect(0,0, box_size, box_size, LED_RED);
   matrix.writeDisplay();
+}
+
+void doOvertime() {
+  uint8_t minutes_past = (millis() - running_since_millis) / MILLIS_TO_MINUTE_RATIO; // we ignore the overflow (approx. every 50 days)
+  drawExpand(minutes_past - minutes_set, LED_RED, LED_YELLOW, LED_RED, LED_BRIGHT);
 }
 
 void doOff() {
