@@ -1,33 +1,14 @@
 #include <Wire.h>
 #include "Adafruit_LEDBackpack.h"
 #include "Adafruit_GFX.h"
+#include "constants.h"
 
 Adafruit_BicolorMatrix matrix = Adafruit_BicolorMatrix();
 
-// circuit constants
-#define BUTTON1_PIN 6
-#define BUTTON2_PIN 7
-
-// user input constants
-#define LONG_PRESS_MILLIS 1500
-#define MAX_MINUTES 120 // (exclusive)
-
-// drawing constants
-#define MINUTES_TOP_OFFSET 1
-#define MINUTES_PER_ROW 5
-#define MAX_MINUTE_ROWS 6
-#define MINUTES_IN_ROWS (MAX_MINUTE_ROWS*MINUTES_PER_ROW)
-
-// modes
-enum mode_t {
-  MODE_SETTING,
-  MODE_RUNNING,
-  MODE_OFF
-};
-
 mode_t mode = MODE_SETTING;
 // initialziation of global variables
-uint8_t minutes_left = 20;
+uint8_t minutes_set = 25;
+unsigned long running_since_millis = 0;
 
 // button handling
 uint8_t button_pins[2] = {BUTTON1_PIN, BUTTON2_PIN};
@@ -50,8 +31,6 @@ void checkButtons() {
       button_down_millis[i] = -1;
     }
   }
-  
-  return;
 }
 
 // no can be 0 or 1 depending on the button pressed.
@@ -59,22 +38,22 @@ void buttonDown(uint8_t no) {
   switch (mode) {
     case MODE_SETTING:
       if (no == 0) {
-        minutes_left++;
-        if (minutes_left > MAX_MINUTES)
-          minutes_left = 1;
+        minutes_set+=5;
+        if (minutes_set >= MAX_MINUTES)
+          minutes_set = 5;
       }
       if (no == 1) {
-        mode = MODE_RUNNING;
+        setMode(MODE_RUNNING);
       }
       break;
     case MODE_RUNNING:
-      // clear display when chaning into OFF, so we do not need to do anything in the MODE_OFF state
-      matrix.clear();
-      matrix.writeDisplay();
-      mode = MODE_OFF;
+      setMode(MODE_OFF);
+      break;
+    case MODE_ALARM:
+      setMode(MODE_OFF);
       break;
     case MODE_OFF:
-      mode = MODE_SETTING;
+      setMode(MODE_SETTING);
       break;
   }
 }
@@ -84,64 +63,105 @@ void buttonDownLong(uint8_t no) {
   switch (mode) {
     case MODE_SETTING:
       if (no == 0)
-        minutes_left = 1;
+        minutes_set = 5;
     break;
     case MODE_RUNNING:
+      break;
+    case MODE_ALARM:
       break;
     case MODE_OFF:
       break;
   }
 }
 
-void draw() {
+void setMode(mode_t to_mode) {
+  mode = to_mode;
   switch (mode) {
     case MODE_SETTING:
-      drawSetting();
-    break;
+      break;
     case MODE_RUNNING:
-      drawRunning();
+      running_since_millis = millis();
+      break;
+    case MODE_ALARM:
       break;
     case MODE_OFF:
-      drawOff();
+      // clear display when chaning into OFF, so we do not need to do anything in the MODE_OFF state
+      matrix.clear();
+      matrix.writeDisplay();
       break;
   }
 }
 
-void drawSetting() {
+void doMode() {
+  switch (mode) {
+    case MODE_SETTING:
+      doSetting();
+    break;
+    case MODE_RUNNING:
+      doRunning();
+      break;
+    case MODE_ALARM:
+      doAlarm();
+      break;
+    case MODE_OFF:
+      doOff();
+      break;
+  }
+}
+
+void drawExpand(uint8_t minutes, uint8_t ones_color, uint8_t first_ring_color, uint8_t ring_color, uint8_t brightness) {
+  matrix.setBrightness(brightness);
   matrix.clear();
-  uint8_t minutes_in_rows = minutes_left % MINUTES_IN_ROWS;
-  uint8_t period_blocks = minutes_left / MINUTES_IN_ROWS;
-  if (minutes_in_rows == 0) { // make that full 30 min are displayed on the left and not on the right
-    minutes_in_rows = MINUTES_IN_ROWS;
-    period_blocks--;
+  uint8_t ones = minutes % 10;
+  uint8_t tens = minutes / 10;
+
+  // draw ones bitmap
+  for (uint8_t j=0; j < ONES_HEIGHT; j++) {
+    for (uint8_t i=0; i < ONES_WIDTH; i++) {
+      if (ONE_BMPS[ones][j][i]) {
+        matrix.drawPixel(i, 8-ONES_WIDTH+j, ones_color);
+      }
+    }
   }
+  // draw 10 min rings
+  for (uint8_t i=0; i < tens; i++) {
+    uint8_t color = ring_color;
+    if (i == 0)
+      color = first_ring_color;
+    matrix.drawLine(0, 8-ONES_HEIGHT-1-i, ONES_WIDTH+i, 8-ONES_HEIGHT-1-i, color); // horizontal line
+    matrix.drawLine(ONES_WIDTH+i, 8-ONES_HEIGHT-1-i, ONES_WIDTH+i, 7, color); // vertical line
+  }
+  matrix.writeDisplay();
+}  
+
+void doSetting() {
+  drawExpand(minutes_set, LED_YELLOW, LED_YELLOW, LED_YELLOW, LED_BRIGHT);
+}
+
+void doRunning() {
+  uint8_t minutes_past = (millis() - running_since_millis) / 600; // we ignore the overflow (approx. every 50 days)
+  if (minutes_past >= minutes_set) {
+    setMode(MODE_ALARM);
+  }
+  drawExpand(minutes_set - minutes_past, LED_GREEN, LED_YELLOW, LED_GREEN, LED_DARK);
+}
+
+void doAlarm() {
+  unsigned long millis_over = -(millis() - running_since_millis);
+  // will give a number between 0 and 15;
+  float pulse = 0.5 + sin((millis_over % (ALARM_PULSE_DURATION * 1000)) / (ALARM_PULSE_DURATION * 1000.0) * 2.0 * PI) / 2.0; // pulses between 0.0 and 1.0 in ALARM_PULSE_DURATION seconds
   
-  // draw minutes on the left (minutes_in_rows)
-  if (minutes_in_rows/MINUTES_PER_ROW > 0)
-    matrix.fillRect(0, MINUTES_TOP_OFFSET, MINUTES_PER_ROW, minutes_in_rows/MINUTES_PER_ROW, LED_GREEN);
-  // draw last row
-  matrix.fillRect(0, MINUTES_TOP_OFFSET+minutes_in_rows/MINUTES_PER_ROW, minutes_left % MINUTES_PER_ROW, 1, LED_YELLOW);
-  // draw periods dots (half hours)
-  for (uint8_t i = 0; i < period_blocks; i++) {
-    matrix.fillRect(6, i*3, 2, 2, LED_RED);
-  }
+  matrix.clear();
+  
+  matrix.setBrightness((uint8_t)(pulse * LED_BRIGHT));
+  uint8_t box_size = min(8, 9 * pulse);
+  matrix.fillRect(0,0, box_size, box_size, LED_RED);
   matrix.writeDisplay();
 }
 
-void drawRunning() {
-  matrix.clear();
-  matrix.fillRect(0, 0, 8, 8, LED_RED);
-  
-  // draw the display differently:
-  // - set brightness to low
-  // - maybe use all dots (64 minutes).
-  // - if there are (more than 64 minutes, then make the last)
-  
-  matrix.writeDisplay();
-}
-
-void drawOff() {
-  // let's reduce energy consumption:
+void doOff() {
+  // let's reduce energy consumption and not clear the display all the time (only done once when display state changes).
+  // and now let's wait a bit.
   delay(500);
 }
 
@@ -153,48 +173,7 @@ void setup() {
 
 void loop() {
   checkButtons();
-  draw();
+  doMode();
   
   delay(50);
-
-//static const uint8_t PROGMEM smile_bmp[] =
-//  { B00111100,
-//    B01000010,
-//    B10100101,
-//    B10000001,
-//    B10100101,
-//    B10011001,
-//    B01000010,
-//    B00111100 };
-//
-//  matrix.blinkRate(2); // blinking on; set to 0 for full on
-//  matrix.setBrightness(0); // between 0 and 15
-//  matrix.fillRect(0,0, 5,4, LED_GREEN);
-//  matrix.fillRect(0,4, 3,1, LED_GREEN);
-//  
-//  matrix.fillRect(6,0, 2,2, LED_GREEN);
-//  matrix.fillRect(6,3, 2,2, LED_GREEN);
-
-//  if (smiling) {
-//    matrix.drawBitmap(0, 0, smile_bmp, 8, 8, color);
-//  } else {
-//    matrix.drawBitmap(0, 0, neutral_bmp, 8, 8, color);
-//  }
-  // TODO detection for just chaning once
-//  if (digitalRead(BUTTON_1_PIN) == LOW) {
-//    smiling = !smiling;
-//  }
-//  
-//  if (digitalRead(BUTTON_2_PIN) == LOW) {
-//    if (color == LED_GREEN) {
-//      color = LED_RED;
-//    } else {
-//      color = LED_GREEN;
-//    }
-//  }
-  
-//  matrix.drawPixel(0, 0, LED_GREEN);
-//  matrix.fillRect(0,6, 2,2, LED_GREEN);
-//  matrix.drawRect(0,4, 2,2, LED_RED);
-//  matrix.fillRect(0,6, 2,2, LED_GREEN);
 }
