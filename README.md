@@ -23,7 +23,7 @@ This display shows the minute pattern (0 - 9 minutes) on the right **lower corne
 
 There are 4 modes:
 
-* **Setting** You can use B1 (button 1) to add minutes to the count down. Each press adds 10 minutes. Use B2 to start the countdown.
+* **Setting** You can use B1 (button 1) to add minutes to the count down. Each press **adds 5 minutes**. Use B2 to start the countdown.
 * **Countdown** The timer runs. You can press any button to switch the timer off.
 * **Alarm** BAAAAM, stop what you are doing! Press any key to go into overtime.
 * **Overtime** This mode shows how many minutes have passed since the alarm. Press any key to switch the alarm off.
