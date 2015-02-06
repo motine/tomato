@@ -3,26 +3,46 @@
 This is a little project, which takes an Arduino and some parts and turns it into a timer.
 See device usage below for details.
 
-## Requirements
+![final timer](https://raw.github.com/motine/tomato/master/final.jpg
 
-* See circuit for needed parts (Arduino (e.g. NanoV3), 2 buttons, Adafruit 8x8 BiColor Matrix with LED backpack).
-* Install Adafruit_GFX, Adafruit_LEDBackpack libraries: See [here](https://learn.adafruit.com/adafruit-led-backpack/1-2-8x8-matrix).
+## Parts and circuit
+
+I bought the following electronic parts:
+
+* Arduino [Nano](http://arduino.cc/en/Main/arduinoBoardNano) V3 (I got mine from SainSmart)
+* Adafruit [8x8 BiColor Matrix](http://www.adafruit.com/product/902) with LED backpack
+* 2 buttons and some cables
+
+I uploaded a pdf with the circuit in the repo.
+
+To compile the code you need the `Adafruit_GFX` and `Adafruit_LEDBackpack` libraries from [here](https://learn.adafruit.com/adafruit-led-backpack/1-2-8x8-matrix).
 
 ## Timer usage
 
-This display shows the minute pattern (0 - 9 minutes) on the left lower corner. The outer rings show 10 minute steps.
+This display shows the minute pattern (0 - 9 minutes) on the right **lower corner**. The outer rings show **10 minute steps**.
 
 There are 4 modes:
 
-* Setting: You can use B1 to add minutes to the count down. Each press adds 5 minutes. Use B2 to start the countdown.
-* Countdown: The timer runs. You can press any button to switch the timer off.
-* Alarm: BAAAAM, stop what you are doing! Press any key to go into overtime.
-* Overtime: This mode shows how many minutes have passed since the alarm. Press any key to switch the alarm off.
-* Off: Powersafe. Press any key for half a second to bring the alarm to life.
+* **Setting** You can use B1 (button 1) to add minutes to the count down. Each press adds 10 minutes. Use B2 to start the countdown.
+* **Countdown** The timer runs. You can press any button to switch the timer off.
+* **Alarm** BAAAAM, stop what you are doing! Press any key to go into overtime.
+* **Overtime** This mode shows how many minutes have passed since the alarm. Press any key to switch the alarm off.
+* **Off** Power safe. Press any key for half a second to bring the alarm to life.
 
-See a demo video on [youtube](http://youtu.be/PVaG_D6qm80) (100x faster):
+See the video on [youtube](http://youtu.be/PVaG_D6qm80) (100x faster).
 
-<iframe width="560" height="315" src="//www.youtube.com/embed/PVaG_D6qm80" frameborder="0" allowfullscreen></iframe>
+## The casing a.k.a. box
+
+I made the `box.svg` with OmniGraffle and then printed it at the [FabLab Berlin](www.fablab-berlin.org) with their laser cutter. I used 3mm MDF.
+They use the software [Visicut](http://hci.rwth-aachen.de/visicut) to import the SVG and drive the cutter. Please also see the PDF for some annotations.
+
+Remember (this is mostly for me, so I don't forget):
+
+* Add add some more material to the male parts to compensate for the laser cutting stuff away.
+* Before importing in Visicut, check for duplicate paths in your SVG (e.g. with Inkscape or illustrator)
+* Don't add backgrounds to the shapes you want to cut out. This may lead to duplicate paths (blurs the lasered edge).
+* Remove the Border path around the canvas.
+* Calibrate the cutter.
 
 ## Resources
 

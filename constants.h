@@ -9,11 +9,6 @@
 #define ALARM_PULSE_DURATION 3
 
 // drawing constants
-#define MINUTES_TOP_OFFSET 1
-#define MINUTES_PER_ROW 5
-#define MAX_MINUTE_ROWS 6
-#define MINUTES_IN_ROWS (MAX_MINUTE_ROWS*MINUTES_PER_ROW)
-
 #define ONES_WIDTH 3
 #define ONES_HEIGHT 3
 
