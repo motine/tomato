@@ -3,7 +3,7 @@
 This is a little project, which takes an Arduino and some parts and turns it into a timer.
 See device usage below for details.
 
-![final timer](https://raw.github.com/motine/tomato/master/final.jpg
+![final timer](https://raw.github.com/motine/tomato/master/final.jpg)
 
 ## Parts and circuit
 
