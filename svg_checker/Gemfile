@@ -1,0 +1,8 @@
+# run in `sudo -i`
+source 'https://rubygems.org'
+gem 'pry'
+gem 'pry-doc'
+gem 'pry-byebug'
+
+# for svg_check
+gem 'chunky_png', '~> 1.3.3'
