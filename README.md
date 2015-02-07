@@ -38,11 +38,12 @@ They use the software [Visicut](http://hci.rwth-aachen.de/visicut) to import the
 
 Remember (this is mostly for me, so I don't forget):
 
-* Add add some more material to the male parts to compensate for the laser cutting stuff away.
-* Before importing in Visicut, check for duplicate paths in your SVG (e.g. with Inkscape or illustrator)
 * Don't add backgrounds to the shapes you want to cut out. This may lead to duplicate paths (blurs the lasered edge).
+* When exporting the SVG do not export the background (transparent background).
+* Add some more material to the male parts of the push-fits. This compensates for the laser cutting stuff away (+0,25mm).
+* Before importing in Visicut, check for duplicate paths in your SVG (e.g. with Inkscape or illustrator)
 * Remove the Border path around the canvas.
-* Calibrate the cutter.
+* Calibrate the cutter before go.
 
 ## Resources
 
